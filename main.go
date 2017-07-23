@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -12,12 +14,15 @@ func main() {
 		"Claire": 29,
 	}
 
-	http.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
-		name := r.URL.Path[len("/users/"):]
+	r := mux.NewRouter()
+
+	r.HandleFunc("/users/{name}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		name := vars["name"]
 		age := userAges[name]
 
 		fmt.Fprintf(w, "%s is %d years old!", name, age)
-	})
+	}).Methods("GET")
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", r)
 }
